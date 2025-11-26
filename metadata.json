@@ -1,0 +1,7 @@
+{
+  "name": "Dulhan Diaries",
+  "description": "A comprehensive management tool for wedding photographers to track bookings, generate invoices, and monitor delivery progress.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
