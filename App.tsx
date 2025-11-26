@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   LayoutGrid, 
@@ -1499,14 +1498,24 @@ END:VCARD`;
                      <label className="block text-xs font-bold opacity-60 uppercase">Amount (BDT)</label>
                      <div className={`flex items-center border rounded mt-1 overflow-hidden ${settings.theme === 'dark' ? 'border-slate-600 bg-slate-700' : 'border-gray-300 bg-white'}`}>
                         <span className="pl-2 opacity-50 text-sm">৳</span>
-                        <input type="number" className={`w-full p-2 outline-none bg-transparent ${theme.text}`} value={selectedBooking.packageAmount} onChange={e => handleChange('packageAmount', Number(e.target.value))} />
+                        <input 
+                            type="number" 
+                            className={`w-full p-2 outline-none bg-transparent ${theme.text}`} 
+                            value={selectedBooking.packageAmount === 0 ? '' : selectedBooking.packageAmount} 
+                            onChange={e => handleChange('packageAmount', e.target.value === '' ? 0 : Number(e.target.value))} 
+                        />
                      </div>
                    </div>
                    <div>
                      <label className="block text-xs font-bold opacity-60 uppercase">Advance Paid (BDT)</label>
                      <div className={`flex items-center border rounded mt-1 overflow-hidden ${settings.theme === 'dark' ? 'border-slate-600 bg-slate-700' : 'border-gray-300 bg-white'}`}>
                         <span className="pl-2 opacity-50 text-sm">৳</span>
-                        <input type="number" className={`w-full p-2 outline-none bg-transparent ${theme.text}`} value={selectedBooking.advanceAmount} onChange={e => handleChange('advanceAmount', Number(e.target.value))} />
+                        <input 
+                            type="number" 
+                            className={`w-full p-2 outline-none bg-transparent ${theme.text}`} 
+                            value={selectedBooking.advanceAmount === 0 ? '' : selectedBooking.advanceAmount} 
+                            onChange={e => handleChange('advanceAmount', e.target.value === '' ? 0 : Number(e.target.value))} 
+                        />
                      </div>
                    </div>
                  </div>
