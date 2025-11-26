@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   LayoutGrid, 
@@ -37,10 +38,12 @@ import {
   FileText,
   Globe,
   Lock,
-  LogOut
+  LogOut,
+  Trash2,
+  Edit2
 } from 'lucide-react';
 import { Booking, DeliveryStatus, AppSettings, EditingTask, DriveFile, AppTheme, InvoiceTheme } from './types';
-import { getBookings, saveBooking, createNewBooking, saveSettings, getSettings } from './services/storageService';
+import { getBookings, saveBooking, createNewBooking, saveSettings, getSettings, deleteBooking } from './services/storageService';
 import { backupToCloud } from './services/backupService';
 import { connectToGoogleDrive, getDemoFolderImages } from './services/driveService';
 import { parseBookingCommand } from './services/geminiService';
@@ -465,11 +468,15 @@ const TrackingPage = ({
   bookings, 
   onUpdate, 
   onDeliver,
+  onEdit,
+  onDelete,
   title
 }: { 
   bookings: Booking[], 
   onUpdate: (b: Booking) => void,
   onDeliver: (b: Booking) => void,
+  onEdit: (b: Booking) => void,
+  onDelete: (b: Booking) => void,
   title: string
 }) => {
   
@@ -480,14 +487,14 @@ const TrackingPage = ({
           const daysUntilStart = Math.ceil((start - today) / (1000 * 60 * 60 * 24));
           const balance = bk.packageAmount - bk.advanceAmount;
           const lastPay = bk.lastPaymentDate ? new Date(bk.lastPaymentDate).getTime() : bk.createdAt;
-          const daysSincePay = Math.floor((today - lastPay) / (1000 * 60 * 60 * 24));
+          // const daysSincePay = Math.floor((today - lastPay) / (1000 * 60 * 60 * 24));
           const shootDate = bk.shootDoneDate ? new Date(bk.shootDoneDate).getTime() : 0;
           const daysSinceShoot = shootDate ? Math.floor((today - shootDate)/(1000*60*60*24)) : 0;
 
           if (bk.editingProgress === 100 && bk.deliveryStatus !== DeliveryStatus.DELIVERED) return 20;
           if (bk.shootDoneDate && daysSinceShoot > 2 && bk.editingProgress < 100 && bk.deliveryStatus !== DeliveryStatus.DELIVERED) return 15;
           if (daysUntilStart >= 0 && daysUntilStart <= 2 && bk.deliveryStatus !== DeliveryStatus.DELIVERED) return 10;
-          if (bk.deliveryStatus === DeliveryStatus.DELIVERED && balance > 0 && daysSincePay >= 3) return 8;
+          if (bk.deliveryStatus === DeliveryStatus.DELIVERED && balance > 0) return 8;
           if (bk.shootDoneDate && bk.editingProgress < 100) return 5;
           return 1;
       };
@@ -567,7 +574,7 @@ const TrackingPage = ({
           ];
 
           return (
-            <div key={booking.id} className={`bg-white p-4 rounded-xl shadow-sm border ${isReadyToDeliver ? 'border-amber-300 ring-2 ring-amber-50' : 'border-gray-100'}`}>
+            <div key={booking.id} className={`bg-white p-4 rounded-xl shadow-sm border ${isReadyToDeliver ? 'border-amber-300 ring-2 ring-amber-50' : isStalledEditing ? 'border-orange-300 ring-2 ring-orange-50 bg-orange-50/30' : 'border-gray-100'}`}>
               
               {isReadyToDeliver && (
                  <div className="mb-2 bg-amber-50 text-amber-700 px-3 py-1 rounded text-xs font-bold flex items-center gap-2">
@@ -575,21 +582,32 @@ const TrackingPage = ({
                  </div>
               )}
               {isStalledEditing && (
-                 <div className="mb-2 bg-indigo-50 text-indigo-700 px-3 py-1 rounded text-xs font-bold flex items-center gap-2">
-                    <Briefcase size={14}/> ACTION: FINISH EDITING ({daysSinceShoot} days ago)
+                 <div className="mb-2 bg-orange-100 text-orange-800 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 animate-pulse border border-orange-200">
+                    <AlertTriangle size={14} className="text-orange-600"/> 
+                    ⚠ Action Required: Finish Editing ({daysSinceShoot} days late)
                  </div>
               )}
 
-              <div className="flex justify-between mb-2">
-                <h4 className="font-bold text-lg text-black">{booking.clientName}</h4>
-                <span className="text-xs text-gray-400">{booking.eventTitle}</span>
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                    <h4 className="font-bold text-lg text-black">{booking.clientName}</h4>
+                    <span className="text-xs text-gray-400">{booking.eventTitle}</span>
+                </div>
+                <div className="flex gap-2">
+                    <button onClick={() => onEdit(booking)} className="p-1.5 hover:bg-gray-100 rounded-full text-gray-400 hover:text-indigo-600">
+                        <Edit2 size={16}/>
+                    </button>
+                    <button onClick={() => onDelete(booking)} className="p-1.5 hover:bg-gray-100 rounded-full text-gray-400 hover:text-red-500">
+                        <Trash2 size={16}/>
+                    </button>
+                </div>
               </div>
               
               {booking.shootDoneDate ? (
                   <div className="mb-4">
                     <div className="flex justify-between text-xs mb-2 text-gray-600 font-bold">
                       <span>Editing Checklist</span>
-                      <span className={isReadyToDeliver ? 'text-amber-600' : 'text-indigo-600'}>{booking.editingProgress}%</span>
+                      <span className={isReadyToDeliver ? 'text-amber-600' : isStalledEditing ? 'text-orange-600' : 'text-indigo-600'}>{booking.editingProgress}%</span>
                     </div>
                     
                     <div className="grid grid-cols-1 gap-2 p-1">
@@ -1066,6 +1084,17 @@ export default function App() {
     setSelectedBooking(booking); 
     setIsEditing(false);
     setShowPostSaveModal(true);
+  };
+
+  const handleDeleteBooking = (booking: Booking) => {
+      if (window.confirm(`Are you sure you want to delete the booking for ${booking.clientName}? This action cannot be undone.`)) {
+          deleteBooking(booking.id);
+          const updatedList = getBookings();
+          setBookings(updatedList);
+          if (settings.enableCloudBackup) triggerBackup(updatedList);
+          setSelectedBooking(null);
+          setIsEditing(false);
+      }
   };
 
   const handleUpdateFromTracking = (booking: Booking) => {
@@ -1548,12 +1577,21 @@ END:VCARD`;
 
           <div className={`p-4 border-t sticky bottom-0 rounded-b-2xl flex gap-2 ${theme.header} border-gray-200/20`}>
             {isEditing ? (
-              <button 
-                onClick={() => handleSaveBooking(selectedBooking)}
-                className={`flex-1 text-white py-3 rounded-lg font-bold shadow-lg active:scale-95 transition ${theme.button}`}
-              >
-                Save Booking
-              </button>
+              <div className="flex gap-2 w-full">
+                <button 
+                    onClick={() => handleDeleteBooking(selectedBooking)}
+                    className="p-3 rounded-lg font-bold bg-red-100 text-red-600 border border-red-200 hover:bg-red-200 transition-colors"
+                    title="Delete Booking"
+                >
+                    <Trash2 size={20} />
+                </button>
+                <button 
+                    onClick={() => handleSaveBooking(selectedBooking)}
+                    className={`flex-1 text-white py-3 rounded-lg font-bold shadow-lg active:scale-95 transition ${theme.button}`}
+                >
+                    Save Booking
+                </button>
+              </div>
             ) : (
               <>
                 <button 
@@ -1667,7 +1705,12 @@ END:VCARD`;
              </div>
 
              {filteredBookings.map(b => (
-               <BookingCard key={b.id} booking={b} onClick={() => setSelectedBooking(b)} />
+               <BookingCard 
+                 key={b.id} 
+                 booking={b} 
+                 onClick={() => setSelectedBooking(b)} 
+                 onDelete={() => handleDeleteBooking(b)}
+               />
              ))}
              {filteredBookings.length === 0 && (
                <div className="text-center mt-20 opacity-40">
@@ -1684,7 +1727,16 @@ END:VCARD`;
           </div>
         )}
         {activeTab === 'calendar' && <CalendarPage bookings={bookings} onSelectBooking={setSelectedBooking} />}
-        {activeTab === 'tracking' && <TrackingPage bookings={bookings} onUpdate={handleUpdateFromTracking} onDeliver={initiateDelivery} title={t('tracking_dashboard')}/>}
+        {activeTab === 'tracking' && (
+            <TrackingPage 
+                bookings={bookings} 
+                onUpdate={handleUpdateFromTracking} 
+                onDeliver={initiateDelivery} 
+                onEdit={(b) => { setSelectedBooking(b); setIsEditing(true); }}
+                onDelete={handleDeleteBooking}
+                title={t('tracking_dashboard')}
+            />
+        )}
         {activeTab === 'gallery' && <GalleryPage isConnected={isGoogleConnected} setIsConnected={setIsGoogleConnected}/>}
       </main>
 

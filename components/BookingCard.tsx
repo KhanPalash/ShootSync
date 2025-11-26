@@ -1,14 +1,15 @@
 
 import React from 'react';
 import { Booking, DeliveryStatus } from '../types';
-import { Calendar, MapPin, CheckCircle, AlertCircle, Clock, Banknote, Briefcase } from 'lucide-react';
+import { Calendar, MapPin, CheckCircle, Clock, Banknote, Briefcase, Trash2 } from 'lucide-react';
 
 interface Props {
   booking: Booking;
   onClick: () => void;
+  onDelete?: (e: React.MouseEvent) => void;
 }
 
-export const BookingCard: React.FC<Props> = ({ booking, onClick }) => {
+export const BookingCard: React.FC<Props> = ({ booking, onClick, onDelete }) => {
   const isReadyToDeliver = booking.editingProgress === 100 && booking.deliveryStatus !== DeliveryStatus.DELIVERED;
   const isShootDone = !!booking.shootDoneDate;
 
@@ -60,7 +61,7 @@ export const BookingCard: React.FC<Props> = ({ booking, onClick }) => {
   return (
     <div 
       onClick={onClick}
-      className={`bg-white rounded-xl shadow-sm border p-4 mb-4 active:scale-95 transition-transform duration-200 relative overflow-hidden ${isReadyToDeliver ? 'border-amber-300 ring-1 ring-amber-100' : 'border-gray-100'}`}
+      className={`bg-white rounded-xl shadow-sm border p-4 mb-4 active:scale-95 transition-transform duration-200 relative overflow-hidden group ${isReadyToDeliver ? 'border-amber-300 ring-1 ring-amber-100' : 'border-gray-100'}`}
     >
       {/* Priority/Warning Badges */}
       {isUpcoming && (
@@ -123,6 +124,20 @@ export const BookingCard: React.FC<Props> = ({ booking, onClick }) => {
           <div className="mt-2 p-2 bg-gray-50 rounded-lg border border-gray-100 text-xs text-center text-gray-400">
               Shoot Pending
           </div>
+      )}
+
+      {/* Delete Action (Visible on Hover or Touch) */}
+      {onDelete && (
+          <button 
+            onClick={(e) => {
+                e.stopPropagation();
+                onDelete(e);
+            }}
+            className="absolute bottom-2 right-2 p-2 bg-white/90 text-red-400 hover:text-red-600 rounded-full hover:bg-red-50 border border-transparent hover:border-red-100 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+            title="Delete Booking"
+          >
+              <Trash2 size={16} />
+          </button>
       )}
     </div>
   );

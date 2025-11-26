@@ -1,0 +1,18 @@
+{
+  "appId": "com.khanscreations.shootsync",
+  "appName": "ShootSync",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "backgroundColor": "#020617",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    }
+  }
+}

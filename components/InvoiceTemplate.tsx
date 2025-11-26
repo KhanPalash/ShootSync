@@ -50,7 +50,11 @@ export const InvoiceTemplate = forwardRef<HTMLDivElement, InvoiceTemplateProps>(
     return amount.toLocaleString('en-BD', { style: 'currency', currency: 'BDT' });
   };
 
-  const logoUrl = settings?.logoType === 'image' ? settings.logoUrl : null;
+  // Logic for Header Logo vs Text
+  const headerLogoUrl = settings?.logoType === 'image' ? settings.logoUrl : null;
+  // Logic for Watermark (Always use the uploaded logo if available, regardless of header type)
+  const watermarkUrl = settings?.logoUrl;
+  
   const companyName = settings?.companyName || 'ShootSync';
   const tagline = settings?.companyTagline || 'Cinematography & Photography';
   const contact = settings?.companyContact || 'Contact: +880 1700-000000';
@@ -121,13 +125,13 @@ export const InvoiceTemplate = forwardRef<HTMLDivElement, InvoiceTemplateProps>(
   return (
     <div ref={ref} className={`w-[210mm] min-h-[297mm] box-border leading-normal relative mx-auto shadow-2xl overflow-hidden ${theme.wrapper}`}>
       
-      {/* WATERMARK: Centered, transparent logo */}
-      {logoUrl && (
+      {/* WATERMARK: STRICTLY CENTERED LOGO, 20% OPACITY */}
+      {watermarkUrl && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden">
              <img 
-               src={logoUrl} 
+               src={watermarkUrl} 
                alt="" 
-               className="w-[70%] opacity-20 object-contain filter grayscale contrast-125" 
+               className="w-[60%] opacity-20 object-contain" 
              /> 
           </div>
       )}
@@ -147,17 +151,13 @@ export const InvoiceTemplate = forwardRef<HTMLDivElement, InvoiceTemplateProps>(
 
             {/* Center Branding Block */}
             <div className="flex flex-col items-center justify-center px-12 text-center">
-                {logoUrl ? (
-                    <img src={logoUrl} alt="Logo" className="h-24 object-contain mb-4" />
+                {headerLogoUrl ? (
+                    <img src={headerLogoUrl} alt="Logo" className="h-24 object-contain mb-4" />
                 ) : (
                     <h1 className={`text-5xl font-bold uppercase tracking-wider mb-2 ${theme.title}`}>{companyName}</h1>
                 )}
                 
-                {/* Fallback to text if logo is used but user wants text name too? Usually replace. 
-                    If logo is present, we show it. If not, we show text.
-                    But Tagline and Contact should always show. */}
-                {logoUrl && <h1 className={`text-2xl font-bold uppercase tracking-wider mb-1 ${theme.title}`}>{companyName}</h1>}
-
+                {/* Tagline & Contact */}
                 <p className={`text-sm tracking-wide uppercase opacity-90 ${theme.textMuted}`}>{tagline}</p>
                 <p className={`text-sm mt-1 ${theme.textMuted}`}>{contact}</p>
             </div>
