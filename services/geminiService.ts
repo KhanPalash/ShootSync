@@ -12,7 +12,7 @@ export const parseBookingCommand = async (command: string): Promise<Booking | nu
     const model = "gemini-2.5-flash";
     const today = new Date().toISOString().split('T')[0];
     const systemInstruction = `
-      You are an assistant for a wedding photographer app called "Dulhan Diaries".
+      You are an assistant for a wedding photographer app called "ShootSync".
       Your task is to extract booking details from natural language text.
       Return a JSON object with the following fields:
       - clientName (string)

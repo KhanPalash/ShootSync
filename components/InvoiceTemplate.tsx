@@ -51,7 +51,7 @@ export const InvoiceTemplate = forwardRef<HTMLDivElement, InvoiceTemplateProps>(
   };
 
   const logoUrl = settings?.logoType === 'image' ? settings.logoUrl : null;
-  const companyName = settings?.companyName || 'Dulhan Diaries';
+  const companyName = settings?.companyName || 'ShootSync';
   const tagline = settings?.companyTagline || 'Cinematography & Photography';
   const contact = settings?.companyContact || 'Contact: +880 1700-000000';
 

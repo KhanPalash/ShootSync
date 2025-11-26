@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   LayoutGrid, 
@@ -120,7 +119,7 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
     useEffect(() => {
         const timer = setTimeout(() => {
             onFinish();
-        }, 2500);
+        }, 3000);
         return () => clearTimeout(timer);
     }, [onFinish]);
 
@@ -129,32 +128,57 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
             {/* Background Effects */}
             <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-950 to-slate-950 animate-pulse"></div>
             
-            <div className="relative z-10">
-                <div 
-                    className="mb-6 opacity-0"
-                    style={{ animation: 'fadeInUp 1s ease-out 0.3s forwards' }}
-                >
-                    <Sparkles className="w-16 h-16 text-amber-500 mx-auto animate-spin-slow" />
-                </div>
-                
-                <h1 
-                    className="text-5xl md:text-6xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200 opacity-0 transform scale-90"
-                    style={{ animation: 'zoomIn 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s forwards' }}
-                >
-                    Khan's Creations
-                </h1>
-                
-                <div 
-                    className="w-24 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto mt-6 opacity-0"
-                    style={{ animation: 'fadeIn 1s ease-out 1s forwards' }}
-                ></div>
+            <div className="relative z-10 w-full max-w-sm">
+                <svg viewBox="0 0 500 500" className="w-full h-auto">
+                    <defs>
+                        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style={{stopColor:'#FFB300', stopOpacity:0}} />
+                        <stop offset="50%" style={{stopColor:'#FFB300', stopOpacity:1}} />
+                        <stop offset="100%" style={{stopColor:'#FFB300', stopOpacity:0}} />
+                        </linearGradient>
+                    </defs>
 
-                <p 
-                    className="text-slate-400 mt-4 text-sm tracking-[0.2em] uppercase opacity-0"
-                    style={{ animation: 'fadeInUp 1s ease-out 1.5s forwards' }}
-                >
-                    Cinematography & Photography
-                </p>
+                    {/* Star Icon Mark */}
+                    <g 
+                        transform="translate(250, 180)" 
+                        className="opacity-0"
+                        style={{ animation: 'zoomIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards' }}
+                    >
+                         <path d="M0 -80 C15 -15, 15 -15, 80 0 C15 15, 15 15, 0 80 C-15 15, -15 15, -80 0 C-15 -15, -15 -15, 0 -80 C-15 -15, -15 -15, 0 -80" 
+                            fill="none" stroke="#FFB300" strokeWidth="35" strokeLinecap="round" strokeLinejoin="round"/>
+                         <circle cx="-50" cy="50" r="20" fill="#FFB300"/>
+                    </g>
+                    
+                    {/* Text: Khan's */}
+                    <text x="250" y="320" textAnchor="middle" fontFamily="'Times New Roman', serif" fontWeight="bold" fontSize="64" fill="#FFF9C4" stroke="#FFF9C4" strokeWidth="1" letterSpacing="2"
+                        className="opacity-0"
+                        style={{ animation: 'fadeInUp 0.8s ease-out 0.6s forwards' }}
+                    >
+                        Khan's
+                    </text>
+                    
+                    {/* Text: Creations */}
+                    <text x="250" y="390" textAnchor="middle" fontFamily="'Times New Roman', serif" fontWeight="bold" fontSize="64" fill="#FFF9C4" stroke="#FFF9C4" strokeWidth="1" letterSpacing="2"
+                        className="opacity-0"
+                        style={{ animation: 'fadeInUp 0.8s ease-out 0.8s forwards' }}
+                    >
+                        Creations
+                    </text>
+                    
+                    {/* Decorative Line & Subtitle */}
+                    <path d="M150 420 Q250 430 350 420" fill="none" stroke="url(#grad1)" strokeWidth="4" strokeLinecap="round"
+                        className="opacity-0"
+                        style={{ animation: 'zoomIn 1s ease-out 1.2s forwards' }}
+                    />
+                        
+                    {/* Subtitle / Copyright */}
+                    <text x="250" y="450" textAnchor="middle" fontFamily="sans-serif" fontSize="12" fill="#FFF9C4" letterSpacing="3" fontWeight="400"
+                        className="opacity-0"
+                        style={{ animation: 'fadeIn 1s ease-out 1.5s forwards' }}
+                    >
+                        CINEMATOGRAPHY & PHOTOGRAPHY
+                    </text>
+                </svg>
             </div>
         </div>
     );
@@ -270,7 +294,7 @@ const GalleryPage = ({ isConnected, setIsConnected }: { isConnected: boolean, se
                          <div className="text-center mb-6">
                              <div className="inline-block mb-4"><GoogleLogo /></div>
                              <h3 className="text-xl font-bold text-gray-800">Sign in with Google</h3>
-                             <p className="text-sm text-gray-500 mt-2">Choose an account to continue to <br/><b>Dulhan Diaries</b></p>
+                             <p className="text-sm text-gray-500 mt-2">Choose an account to continue to <br/><b>ShootSync</b></p>
                          </div>
 
                          <div className="space-y-2">
@@ -283,7 +307,7 @@ const GalleryPage = ({ isConnected, setIsConnected }: { isConnected: boolean, se
                                  </div>
                                  <div className="flex-1 min-w-0">
                                      <p className="font-bold text-gray-800 truncate">Photographer</p>
-                                     <p className="text-xs text-gray-500 truncate">photographer@dulhandiaries.com</p>
+                                     <p className="text-xs text-gray-500 truncate">photographer@shootsync.com</p>
                                  </div>
                              </button>
                              <div className="border-t border-gray-100 my-2"></div>
@@ -296,7 +320,7 @@ const GalleryPage = ({ isConnected, setIsConnected }: { isConnected: boolean, se
                          </div>
                          
                          <p className="text-[10px] text-gray-400 text-center mt-6 leading-tight">
-                             To continue, Google will share your name, email address, and profile picture with Dulhan Diaries.
+                             To continue, Google will share your name, email address, and profile picture with ShootSync.
                          </p>
                     </div>
                 </div>
@@ -792,7 +816,7 @@ const SettingsModal = ({
                         value={localSettings.companyName}
                         onChange={(e) => setLocalSettings(s => ({...s, companyName: e.target.value}))}
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm font-semibold"
-                        placeholder="Dulhan Diaries"
+                        placeholder="Khan's Creations"
                       />
                     </div>
                     <div>
@@ -923,7 +947,7 @@ export default function App() {
 
   // Sync document title with Company Name
   useEffect(() => {
-    document.title = settings.companyName || 'Dulhan Diaries';
+    document.title = settings.companyName || 'ShootSync';
   }, [settings.companyName]);
 
   const t = (key: keyof typeof TRANSLATIONS['en']) => {
@@ -1564,7 +1588,7 @@ END:VCARD`;
             <button onClick={() => setIsSidebarOpen(true)} className="p-1 rounded hover:bg-black/5">
                 <MoreVertical size={24} className={theme.accent} />
             </button>
-            <h1 className={`text-xl font-bold tracking-tight ${theme.accent}`}>{settings.companyName}</h1>
+            <h1 className={`text-xl font-bold tracking-tight ${theme.accent}`}>{settings.companyName || 'ShootSync'}</h1>
             {isBackingUp && <Cloud size={16} className="text-blue-500 animate-pulse ml-2" />}
         </div>
         <button 
@@ -1583,7 +1607,7 @@ END:VCARD`;
               <div className="fixed inset-0 bg-black/50" onClick={() => setIsSidebarOpen(false)}></div>
               <div className={`w-64 ${theme.bg} ${theme.text} h-full shadow-2xl relative p-6 flex flex-col`}>
                   <div className="mb-8">
-                    <h2 className={`text-2xl font-bold ${theme.accent} mb-1`}>{settings.companyName}</h2>
+                    <h2 className={`text-2xl font-bold ${theme.accent} mb-1`}>{settings.companyName || 'ShootSync'}</h2>
                     <p className="text-xs opacity-60">{settings.companyTagline}</p>
                   </div>
                   

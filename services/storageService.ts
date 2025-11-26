@@ -30,14 +30,19 @@ export const saveSettings = (settings: AppSettings): void => {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 };
 
+// SVG Logo Data URI (Khan's Creations Logo)
+// Optimized for white paper (Invoice) with darker gold text
+const DEFAULT_LOGO_SVG = `data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cg transform='translate(250, 180)'%3E%3Cpath d='M0 -80 C15 -15, 15 -15, 80 0 C15 15, 15 15, 0 80 C-15 15, -15 15, -80 0 C-15 -15, -15 -15, 0 -80 C-15 -15, -15 -15, 0 -80' fill='none' stroke='%23FFB300' stroke-width='35' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='-50' cy='50' r='20' fill='%23FFB300'/%3E%3C/g%3E%3Ctext x='250' y='320' text-anchor='middle' font-family='Times New Roman, serif' font-weight='bold' font-size='64' fill='%23B8860B' stroke='%23B8860B' stroke-width='1' letter-spacing='2'%3EKhan's%3C/text%3E%3Ctext x='250' y='390' text-anchor='middle' font-family='Times New Roman, serif' font-weight='bold' font-size='64' fill='%23B8860B' stroke='%23B8860B' stroke-width='1' letter-spacing='2'%3ECreations%3C/text%3E%3Ctext x='250' y='440' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%23000000' letter-spacing='4' font-weight='500'%3ECINEMATOGRAPHY %26amp; PHOTOGRAPHY%3C/text%3E%3C/svg%3E`;
+
 export const getSettings = (): AppSettings => {
   const data = localStorage.getItem(SETTINGS_KEY);
   return data ? JSON.parse(data) : { 
     language: 'en',
     theme: 'light', 
     invoiceTheme: 'classic',
-    logoType: 'text',
-    companyName: 'Dulhan Diaries',
+    logoType: 'image',
+    logoUrl: DEFAULT_LOGO_SVG,
+    companyName: "Khan's Creations",
     companyTagline: 'Cinematography & Photography',
     companyContact: 'Contact: +880 1700-000000',
     enableCloudBackup: false
