@@ -1,4 +1,3 @@
-
 import { Booking } from '../types';
 
 /**

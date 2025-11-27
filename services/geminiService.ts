@@ -3,35 +3,50 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Booking } from "../types";
 import { createNewBooking } from "./storageService";
 
-// Initialize Gemini
-// Note: In a real production app, ensure this key is guarded.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Initialize Gemini lazily
+let ai: GoogleGenAI | null = null;
+
+const getAiClient = (): GoogleGenAI => {
+  if (!ai) {
+    // Check if process is defined (e.g. in Vite build with define) or fallback to empty string
+    // to prevent runtime crash in browser environments where process is not shimmed.
+    // The API key is assumed to be available via process.env.API_KEY.
+    const apiKey = (typeof process !== 'undefined' && process.env && process.env.API_KEY) ? process.env.API_KEY : '';
+    ai = new GoogleGenAI({ apiKey });
+  }
+  return ai;
+};
 
 export const parseBookingCommand = async (command: string): Promise<Booking | null> => {
   try {
+    const client = getAiClient();
     const model = "gemini-2.5-flash";
     const today = new Date().toISOString().split('T')[0];
     const systemInstruction = `
-      You are an assistant for a wedding photographer app called "ShootSync".
-      Your task is to extract booking details from natural language text.
-      Return a JSON object with the following fields:
-      - clientName (string)
-      - clientPhone (string, optional)
-      - groomName (string, optional)
-      - brideName (string, optional)
-      - eventTitle (string, e.g., Wedding, Reception)
-      - startDate (string, YYYY-MM-DD format). If only one date is mentioned, this is the date.
-      - endDate (string, YYYY-MM-DD format). If the event is multiple days (e.g. "from 12th to 14th"), set this to the last day. If single day, set equal to startDate.
-      - venue (string)
-      - packageAmount (number)
-      - advanceAmount (number)
-      - notes (string)
+      You are an intelligent assistant for "ShootSync", a premium wedding photography management app.
+      Your task is to extract structural booking data from natural language text.
+      
+      Current Date: ${today}
 
-      If information is missing, use reasonable defaults or leave empty/0.
-      Today's date is ${today}.
+      Return a JSON object with:
+      - clientName (string): Full name of the client.
+      - clientPhone (string, optional): Phone number if present.
+      - groomName (string, optional): Name of groom.
+      - brideName (string, optional): Name of bride.
+      - eventTitle (string): e.g., "Wedding", "Reception", "Haldi". Default to "Wedding Ceremony" if unclear.
+      - startDate (string): YYYY-MM-DD format.
+      - endDate (string): YYYY-MM-DD format. If single day, same as startDate.
+      - venue (string): Location or venue name.
+      - packageAmount (number): Total booking value.
+      - advanceAmount (number): Amount paid upfront.
+      - notes (string): Any extra details like "Cinematography only" or "Drone required".
+
+      Rules:
+      1. If the year is missing, assume the next occurrence of that date relative to ${today}.
+      2. If "next week" or "tomorrow" is used, calculate the date based on ${today}.
     `;
 
-    const response = await ai.models.generateContent({
+    const response = await client.models.generateContent({
       model: model,
       contents: command,
       config: {
@@ -61,10 +76,17 @@ export const parseBookingCommand = async (command: string): Promise<Booking | nu
     if (!text) return null;
 
     const parsedData = JSON.parse(text);
-    // Ensure endDate is at least startDate
+    
+    // Data sanitization
     if (!parsedData.endDate && parsedData.startDate) {
       parsedData.endDate = parsedData.startDate;
     }
+    
+    // Ensure endDate is not before startDate
+    if (parsedData.startDate && parsedData.endDate && parsedData.endDate < parsedData.startDate) {
+        parsedData.endDate = parsedData.startDate;
+    }
+
     return createNewBooking(parsedData);
 
   } catch (error) {
