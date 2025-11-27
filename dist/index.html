@@ -4,11 +4,22 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>ShootSync — Test</title>
+    <script>
+      // quick debug: if page loads inside WebView you'll see alert
+      window.addEventListener('DOMContentLoaded', () => {
+        document.body.style.background = '#fff';
+        const d = document.createElement('div');
+        d.style.cssText = 'font-family: sans-serif; text-align:center; padding-top:40vh;';
+        d.innerHTML = '<h1>ShootSync test page</h1><p>Web assets loaded.</p>';
+        document.body.appendChild(d);
+        console.log('DEBUG: index.html loaded');
+        // try an alert only once
+        if (!localStorage.getItem('seenAlert')) {
+          try { alert('ShootSync index.html loaded'); } catch(e) {}
+          localStorage.setItem('seenAlert','1');
+        }
+      });
+    </script>
   </head>
-  <body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
-    <div style="text-align:center;">
-      <h1>ShootSync</h1>
-      <p>Web assets loaded correctly.</p>
-    </div>
-  </body>
+  <body></body>
 </html>
