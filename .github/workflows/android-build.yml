@@ -1,15 +1,12 @@
-name: Build Android APK (Capacitor)
+name: Build Debug APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      JAVA_TOOL_OPTIONS: "-Xmx2g"
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -17,7 +14,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '18'
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -32,15 +29,46 @@ jobs:
         working-directory: .
         run: npm install --no-audit --no-fund
 
-      - name: (Optional) Build web assets
-        # If your capacitor.config.json points webDir -> "public", skip or ensure public exists.
-        # If you need a build step (vite/webpack) enable this and adjust command.
+      - name: Build web assets (optional)
+        shell: bash
         run: |
+          # If package.json has a build script, run it. Otherwise skip.
           if [ -f package.json ] && grep -q "\"build\":" package.json; then
             npm run build || true
           else
             echo "No build script found - skipping web build"
           fi
+
+      - name: Ensure both dist and public exist (make copies)
+        shell: bash
+        run: |
+          # If dist exists, copy it to public so both locations have the same files.
+          # Else if public exists, copy it to dist.
+          if [ -d dist ]; then
+            rm -rf public || true
+            cp -a dist public
+            echo "Copied dist -> public"
+          elif [ -d public ]; then
+            rm -rf dist || true
+            cp -a public dist
+            echo "Copied public -> dist"
+          else
+            # no web assets found — create minimal index so Capacitor doesn't fail
+            mkdir -p dist
+            cat > dist/index.html <<'HTML'
+            <!doctype html>
+            <html>
+            <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ShootSync placeholder</title></head>
+            <body style="font-family: sans-serif; display:flex; height:100vh; align-items:center; justify-content:center;">
+              <div><h1>ShootSync</h1><p>Placeholder page — no built web assets found.</p></div>
+            </body>
+            </html>
+            HTML
+            cp -a dist public
+            echo "Created placeholder dist and copied to public"
+          fi
+          ls -la dist | sed -n '1,20p' || true
+          ls -la public | sed -n '1,20p' || true
 
       - name: Capacitor sync android
         run: npx cap sync android
@@ -53,4 +81,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/debug/*.apk
