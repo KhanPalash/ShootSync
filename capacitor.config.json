@@ -1,7 +1,7 @@
 {
   "appId": "com.khanscreations.shootsync",
   "appName": "ShootSync",
-  "webDir": "public",
+  "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {
     "androidScheme": "https"
